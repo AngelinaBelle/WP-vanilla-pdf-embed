@@ -92,17 +92,19 @@ function vpdfe_pdf_embed_html_from_shortcode( $params , $content = null ) {
     extract( shortcode_atts( // Creates variables in your namespace
         array(
             'width' => '100%',
-            'height'=> '500em',
+            'height'=> '80em',
             'title' => '',
             'src'   => '',
         ), $params )
     );
+    if ( is_numeric($width) ) {$width .= 'px';}
+    if ( is_numeric($height) ) {$height .= 'px';}
 
     $embed_html = vpdfe_pdf_embed_html($src ? $src : $content, VPDFE_SHORTCODE, $title, $width, $height);
     return $embed_html ? $embed_html : $content;
 }
 
-function vpdfe_pdf_embed_html($src, $route=VPDFE_SHORTCODE, $title='', $w='100%', $h='500em') {
+function vpdfe_pdf_embed_html($src, $route=VPDFE_SHORTCODE, $title='', $w='100%', $h='80em') {
     // if $content is a URL pointing to an attachment page on this Wordpress
     // site then get the PDF's actual URL
     if ( $id = vpdfe_extract_id_from_wp_url($src) ) {
@@ -124,15 +126,15 @@ function vpdfe_pdf_embed_html($src, $route=VPDFE_SHORTCODE, $title='', $w='100%'
 
 
     // FitH will fit the page width in the embed window
-    $template = '<object class="vanilla-pdf-embed" data="%1$s#page=1&view=FitH" type="application/pdf" %3$s %4$s>
+    $template = '<object class="vanilla-pdf-embed" data="%1$s#page=1&view=FitH" type="application/pdf" style="%3$s %4$s">
     <p><a href="%1$s">Download the PDF file%2$s.</a></p>
 </object>';
 
     return sprintf( $template,
         esc_url($src),
         esc_attr(" $title"),
-        ($w ? 'width="' . esc_attr($w) . '"' : ''),
-        ($h? 'height="' . esc_attr($h) . '"' : '')
+         ($w ? 'width: ' . esc_attr($w) . ';' : ''),
+         ($h? 'height: ' . esc_attr($h) . ';' : '')
     );
 }
 add_shortcode( 'pdf', 'vpdfe_pdf_embed_html_from_shortcode' );
