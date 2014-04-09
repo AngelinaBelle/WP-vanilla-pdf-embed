@@ -125,16 +125,29 @@ function vpdfe_pdf_embed_html($src, $route=VPDFE_SHORTCODE, $title='', $w='100%'
     }
 
 
-    // FitH will fit the page width in the embed window
-    $template = '<object class="vanilla-pdf-embed" data="%1$s#page=1&view=FitH" type="application/pdf" style="%3$s %4$s">
-    <p><a href="%1$s">Download the PDF file%2$s.</a></p>
-</object>';
+    // FitH will fit the page width in the embed window (except in Chrome browsers)
+    // is_chrome comes in PHP Browser Detection
+    // strangely, <object> does not work well with twentyfourteen theme.  Works fine with responsive!
+    $doIframe = (  ( (function_exists( 'is_chrome' ) ) ? is_chrome() : False ) || 
+                   ( (function_exists( 'is_safari' ) ) ? is_safari() : False )    ) ;
+    if ( $doIframe ) {
+    	$template = '
+    	<p><a href="%1$s">Download the PDF file%2$s.</a></p><iframe %5$s src="%1$s#page=1&view=FitH" style="%3$s %4$s" ></iframe>
+    ';
+
+    }
+    else {
+	    $template = '
+	    <p><a href="%1$s">Download the PDF file%2$s.</a></p><object %5$s data="%1$s#page=1&view=FitH" type="application/pdf" style="%3$s %4$s"></object>
+	    ';
+	}
 
     return sprintf( $template,
         esc_url($src),
         esc_attr(" $title"),
-         ($w ? 'width: ' . esc_attr($w) . ';' : ''),
-         ($h? 'height: ' . esc_attr($h) . ';' : '')
+        ($w ? 'width: ' . esc_attr($w) . ';' : ''),
+        ($h? 'height: ' . esc_attr($h) . ';' : ''),
+        ' class="' . esc_attr('vanilla-pdf-embed'). '" '
     );
 }
 add_shortcode( 'pdf', 'vpdfe_pdf_embed_html_from_shortcode' );
